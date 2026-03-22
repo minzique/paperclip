@@ -1,12 +1,12 @@
 ---
-name: linear-augment
+name: linear-boringhost
 description: >
-  Augment Linear workspace context — team, projects, states, queries, and agent
+  BoringHost Linear workspace context — team, projects, states, queries, and agent
   workflow patterns. Pair with CLI scripts (query.ts, linear-ops.ts) for all
-  Linear operations. Use when creating/querying issues in the Augment team.
+  Linear operations. Use when creating/querying issues in the BOR team.
 ---
 
-# Augment Linear Workspace
+# BoringHost Linear Workspace
 
 Project-specific Linear context for ops-agent agents. Provides workspace IDs, ready-to-use queries, mutation patterns, and the autonomous agent workflow.
 

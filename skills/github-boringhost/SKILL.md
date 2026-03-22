@@ -1,45 +1,45 @@
 ---
-name: github-augment
+name: github-boringhost
 description: >
-  GitHub CLI patterns for Augment repos — issue management, PR workflows, merge
+  GitHub CLI patterns for boringhost repos — issue management, PR workflows, merge
   tiers, and review automation via gh CLI. Use when working with GitHub issues,
-  pull requests, or repository operations for Augment projects.
+  pull requests, or repository operations for BoringHost projects.
 ---
 
-# GitHub Augment
+# GitHub BoringHost
 
-GitHub operations for Augment repos using the `gh` CLI. No MCP servers — CLI only.
+GitHub operations for boringhost repos using the `gh` CLI. No MCP servers — CLI only.
 
 ## Repos
 
 | Repo | Purpose |
 |------|---------|
-| `minzique/ops-agent` | Ops-agent monorepo (Paperclip + agents) |
+| `augment-hq/guestflow-atlas` | Ops-agent monorepo (Paperclip + agents) |
 
 ## Issue Management
 
 ```bash
 # List open issues
-gh issue list --repo minzique/ops-agent
+gh issue list --repo augment-hq/guestflow-atlas
 
 # List with filters
-gh issue list --repo minzique/ops-agent --label bug --state open
-gh issue list --repo minzique/ops-agent --assignee @me
+gh issue list --repo augment-hq/guestflow-atlas --label bug --state open
+gh issue list --repo augment-hq/guestflow-atlas --assignee @me
 
 # View issue details
-gh issue view 42 --repo minzique/ops-agent
+gh issue view 42 --repo augment-hq/guestflow-atlas
 
 # Create issue
-gh issue create --repo minzique/ops-agent \
+gh issue create --repo augment-hq/guestflow-atlas \
   --title "type(scope): summary" \
   --body "Description" \
   --label "bug,backend"
 
 # Close issue
-gh issue close 42 --repo minzique/ops-agent --comment "Resolved in #43"
+gh issue close 42 --repo augment-hq/guestflow-atlas --comment "Resolved in #43"
 
 # Add comment
-gh issue comment 42 --repo minzique/ops-agent --body "Update: working on fix"
+gh issue comment 42 --repo augment-hq/guestflow-atlas --body "Update: working on fix"
 ```
 
 ## Pull Request Workflow
@@ -48,7 +48,7 @@ gh issue comment 42 --repo minzique/ops-agent --body "Update: working on fix"
 
 ```bash
 # Standard PR creation
-gh pr create --repo minzique/ops-agent \
+gh pr create --repo augment-hq/guestflow-atlas \
   --title "type(scope): summary (#issue)" \
   --body "$(cat <<'EOF'
 ## Summary
@@ -95,35 +95,35 @@ chore/AUG-789-dependency-update
 
 ```bash
 # List open PRs
-gh pr list --repo minzique/ops-agent
+gh pr list --repo augment-hq/guestflow-atlas
 
 # View PR details
-gh pr view 43 --repo minzique/ops-agent
+gh pr view 43 --repo augment-hq/guestflow-atlas
 
 # View PR diff
-gh pr diff 43 --repo minzique/ops-agent
-gh pr diff 43 --repo minzique/ops-agent --stat    # Summary only
+gh pr diff 43 --repo augment-hq/guestflow-atlas
+gh pr diff 43 --repo augment-hq/guestflow-atlas --stat    # Summary only
 
 # Watch CI checks
-gh pr checks 43 --repo minzique/ops-agent --watch --fail-level all
+gh pr checks 43 --repo augment-hq/guestflow-atlas --watch --fail-level all
 
 # Read reviews
-gh api repos/minzique/ops-agent/pulls/43/reviews
-gh api repos/minzique/ops-agent/pulls/43/comments
+gh api repos/augment-hq/guestflow-atlas/pulls/43/reviews
+gh api repos/augment-hq/guestflow-atlas/pulls/43/comments
 ```
 
 ### Merging PRs
 
 ```bash
 # Squash merge (preferred)
-gh pr merge 43 --repo minzique/ops-agent --squash \
+gh pr merge 43 --repo augment-hq/guestflow-atlas --squash \
   --subject "feat(scope): summary (AUG-XXX) (#43)"
 
 # Merge commit (for large feature branches)
-gh pr merge 43 --repo minzique/ops-agent --merge
+gh pr merge 43 --repo augment-hq/guestflow-atlas --merge
 
 # Delete branch after merge (usually automatic)
-gh pr merge 43 --repo minzique/ops-agent --squash --delete-branch
+gh pr merge 43 --repo augment-hq/guestflow-atlas --squash --delete-branch
 ```
 
 ## Merge Tiers
@@ -177,31 +177,31 @@ For operations not covered by `gh` subcommands:
 gh api graphql -f query='{ viewer { login } }'
 
 # REST API
-gh api repos/minzique/ops-agent/pulls/43
-gh api repos/minzique/ops-agent/issues/42/comments
+gh api repos/augment-hq/guestflow-atlas/pulls/43
+gh api repos/augment-hq/guestflow-atlas/issues/42/comments
 
 # POST request
-gh api repos/minzique/ops-agent/issues/42/comments \
+gh api repos/augment-hq/guestflow-atlas/issues/42/comments \
   -f body="Automated comment from agent"
 
 # Pagination
-gh api repos/minzique/ops-agent/issues --paginate --jq '.[].title'
+gh api repos/augment-hq/guestflow-atlas/issues --paginate --jq '.[].title'
 ```
 
 ## Repository Operations
 
 ```bash
 # Clone
-gh repo clone minzique/ops-agent
+gh repo clone augment-hq/guestflow-atlas
 
 # List repos in org
 gh repo list minzique --limit 50
 
 # View repo info
-gh repo view minzique/ops-agent
+gh repo view augment-hq/guestflow-atlas
 
 # Create release
-gh release create v1.0.0 --repo minzique/ops-agent \
+gh release create v1.0.0 --repo augment-hq/guestflow-atlas \
   --title "v1.0.0" --notes "Release notes"
 ```
 
@@ -209,16 +209,16 @@ gh release create v1.0.0 --repo minzique/ops-agent \
 
 ```bash
 # List recent workflow runs
-gh run list --repo minzique/ops-agent --limit 10
+gh run list --repo augment-hq/guestflow-atlas --limit 10
 
 # View specific run
-gh run view <run-id> --repo minzique/ops-agent
+gh run view <run-id> --repo augment-hq/guestflow-atlas
 
 # Watch a running workflow
-gh run watch <run-id> --repo minzique/ops-agent
+gh run watch <run-id> --repo augment-hq/guestflow-atlas
 
 # Re-run failed jobs
-gh run rerun <run-id> --repo minzique/ops-agent --failed
+gh run rerun <run-id> --repo augment-hq/guestflow-atlas --failed
 ```
 
 ## Conventions
