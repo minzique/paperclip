@@ -1,5 +1,5 @@
 {
-  "name": "linear-augment",
+  "name": "linear-boringhost",
   "version": "1.0.0",
   "type": "module",
   "description": "Linear CLI skill for Augment workspace — queries, mutations, and agent workflows",
