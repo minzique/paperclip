@@ -1,0 +1,9 @@
+{
+  "name": "exa-search",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Exa web search CLI wrapper with rate limiting",
+  "dependencies": {
+    "exa-js": "^1.0.0"
+  }
+}
