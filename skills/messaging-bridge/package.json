@@ -1,0 +1,6 @@
+{
+  "name": "messaging-bridge-skill",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Paperclip skill for agents to use the messaging bridge API"
+}
