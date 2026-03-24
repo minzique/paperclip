@@ -1,86 +1,90 @@
 # Messaging Bridge
 
-Send notifications and read conversations across Slack and WhatsApp via the unified messaging bridge.
+Send notifications and query Slack/WhatsApp via the unified messaging bridge.
 
 ## Security Model
 
-- **WhatsApp is owner-only**: the bridge can ONLY send WhatsApp messages to the configured owner. It cannot message your contacts. This is enforced server-side — there is no bypass.
-- **Slack**: can send to any channel the bot is in.
-- **All endpoints require** `BRIDGE_API_TOKEN` bearer auth.
+- **WhatsApp**: owner-only sends, enforced server-side
+- **Slack /send**: only channels with active conversation threads
+- **All endpoints require** `BRIDGE_API_TOKEN` bearer auth (except `/health`)
 
 ## Environment
-
-The bridge runs at `BRIDGE_API_URL` (default: `http://messaging-bridge:3200` inside Docker).
 
 ```bash
 export BRIDGE_URL="${BRIDGE_API_URL:-http://messaging-bridge:3200}"
 export BRIDGE_TOKEN="${BRIDGE_API_TOKEN}"
+AUTH="-H 'Authorization: Bearer $BRIDGE_TOKEN'"
 ```
 
-## Send a Notification to Owner
-
-Use this when you need to alert minzi about something — task completion, approval needed, errors, status updates.
+## Notify Owner
 
 ```bash
-curl -s -X POST "$BRIDGE_URL/notify" \
-  -H "Authorization: Bearer $BRIDGE_TOKEN" \
+curl -s -X POST "$BRIDGE_URL/notify" $AUTH \
   -H "Content-Type: application/json" \
   -d '{"text": "Your message here", "priority": "normal"}'
 ```
 
-Priority `"urgent"` sends to ALL configured channels (Slack + WhatsApp).
-Priority `"normal"` uses the configured default channel.
+`"priority": "urgent"` sends to ALL channels (Slack + WhatsApp).
 
-## Send to a Specific Slack Channel
+## Query Slack
+
+### List channels the bot is in
 
 ```bash
-curl -s -X POST "$BRIDGE_URL/send" \
-  -H "Authorization: Bearer $BRIDGE_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"platform": "slack", "to": "C09SLB47JG4", "text": "Message text"}'
+curl -s "$BRIDGE_URL/slack/channels" $AUTH
 ```
+
+### Get channel history (last N messages)
+
+```bash
+curl -s "$BRIDGE_URL/slack/channels/CHANNEL_ID/history?limit=20" $AUTH
+# Pagination: &latest=TIMESTAMP or &oldest=TIMESTAMP
+```
+
+### Get a thread
+
+```bash
+curl -s "$BRIDGE_URL/slack/channels/CHANNEL_ID/threads/THREAD_TS?limit=50" $AUTH
+```
+
+All query responses return `[{ ts, time, sender, text, ... }]`.
+
+## Send to Active Slack Thread
+
+```bash
+curl -s -X POST "$BRIDGE_URL/send" $AUTH \
+  -H "Content-Type: application/json" \
+  -d '{"platform": "slack", "to": "CHANNEL_ID", "text": "Message"}'
+```
+
+Only works for channels with active conversation threads.
 
 ## Send to Owner via WhatsApp
 
 ```bash
-curl -s -X POST "$BRIDGE_URL/send" \
-  -H "Authorization: Bearer $BRIDGE_TOKEN" \
+curl -s -X POST "$BRIDGE_URL/send" $AUTH \
   -H "Content-Type: application/json" \
-  -d '{"platform": "whatsapp", "text": "Message text"}'
+  -d '{"platform": "whatsapp", "text": "Message"}'
 ```
 
-Note: the `to` field is ignored for WhatsApp — it always sends to the owner.
+`to` field is ignored — always routes to owner.
 
 ## List Active Conversations
 
 ```bash
-curl -s "$BRIDGE_URL/conversations" \
-  -H "Authorization: Bearer $BRIDGE_TOKEN"
+curl -s "$BRIDGE_URL/conversations" $AUTH
 ```
-
-Returns an array of `{ key, platform, channelId, issueId, createdAt, commentCount }`.
 
 ## Read Conversation Messages
 
 ```bash
-curl -s "$BRIDGE_URL/conversations/$(echo -n 'slack:C09SLB47JG4:1234567890' | jq -sRr @uri)/messages" \
-  -H "Authorization: Bearer $BRIDGE_TOKEN"
+curl -s "$BRIDGE_URL/conversations/ENCODED_KEY/messages" $AUTH
 ```
-
-Returns `{ platform, issueId, messages: [{ id, body, authorAgentId, createdAt }] }`.
-
-## Check Bridge Health
-
-```bash
-curl -s "$BRIDGE_URL/health"
-```
-
-Returns `{ status, slack, whatsapp, activeThreads }`.
 
 ## When to Use
 
-- **Task completed**: notify owner with summary
-- **Approval needed**: notify with context + options
+- **Need context**: query channel history or search messages before answering
+- **Task completed**: notify owner
+- **Approval needed**: notify with context
 - **Error/blocker**: urgent notify
-- **Status update**: post to Slack channel
-- **Read context**: list conversations to understand what's being discussed
+- **Read Slack**: search or browse channel history for information
