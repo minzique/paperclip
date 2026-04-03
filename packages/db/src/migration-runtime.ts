@@ -39,6 +39,10 @@ function toError(error: unknown, fallbackMessage: string): Error {
   }
 }
 
+function writeEmbeddedPostgresMessage(message: unknown): void {
+  process.stderr.write(typeof message === "string" ? message : `${String(message)}\n`);
+}
+
 function readRunningPostmasterPid(postmasterPidFile: string): number | null {
   if (!existsSync(postmasterPidFile)) return null;
   try {
@@ -150,9 +154,9 @@ async function ensureEmbeddedPostgresConnection(
     password: "paperclip",
     port: selectedPort,
     persistent: true,
-    initdbFlags: ["--encoding=UTF8", "--locale=C"],
-    onLog: () => {},
-    onError: () => {},
+    initdbFlags: ["--encoding=UTF8", "--locale=C", "--lc-messages=C"],
+    onLog: writeEmbeddedPostgresMessage,
+    onError: writeEmbeddedPostgresMessage,
   });
 
   if (!existsSync(path.resolve(dataDir, "PG_VERSION"))) {
