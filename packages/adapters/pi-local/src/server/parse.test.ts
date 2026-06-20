@@ -237,6 +237,32 @@ describe("parsePiJsonl", () => {
     expect(parsed.errors).toEqual([]);
   });
 
+  it("surfaces assistant stopReason errors", () => {
+    const stdout = [
+      JSON.stringify({
+        type: "message_end",
+        message: {
+          role: "assistant",
+          content: [],
+          stopReason: "error",
+          errorMessage: "400 provider quota exhausted",
+        },
+      }),
+      JSON.stringify({
+        type: "turn_end",
+        message: {
+          role: "assistant",
+          content: [],
+          stopReason: "error",
+          errorMessage: "400 provider quota exhausted",
+        },
+      }),
+    ].join("\n");
+
+    const parsed = parsePiJsonl(stdout);
+    expect(parsed.errors).toContain("400 provider quota exhausted");
+  });
+
   it("surfaces standalone error events", () => {
     const stdout = [
       JSON.stringify({

@@ -28,6 +28,16 @@ function extractTextContent(content: string | Array<{ type: string; text?: strin
     .join("");
 }
 
+function collectAssistantError(message: Record<string, unknown>, errors: string[]): void {
+  const stopReason = asString(message.stopReason, "");
+  const errorMessage = asString(message.errorMessage, "").trim();
+  if (errorMessage) {
+    errors.push(errorMessage);
+  } else if (stopReason === "error") {
+    errors.push("Pi assistant turn ended with stopReason=error.");
+  }
+}
+
 export function parsePiJsonl(stdout: string): ParsedPiOutput {
   const result: ParsedPiOutput = {
     sessionId: null,
@@ -71,6 +81,7 @@ export function parsePiJsonl(stdout: string): ParsedPiOutput {
         if (lastMessage?.role === "assistant") {
           const content = lastMessage.content as string | Array<{ type: string; text?: string }>;
           result.finalMessage = extractTextContent(content);
+          collectAssistantError(lastMessage, result.errors);
         }
       }
       continue;
@@ -81,6 +92,15 @@ export function parsePiJsonl(stdout: string): ParsedPiOutput {
       if (!succeeded) {
         const finalError = asString(event.finalError, "").trim();
         result.errors.push(finalError || "Pi exhausted automatic retries without producing a response.");
+      }
+      continue;
+    }
+
+    // Message lifecycle
+    if (eventType === "message_start" || eventType === "message_end") {
+      const message = asRecord(event.message);
+      if (message?.role === "assistant") {
+        collectAssistantError(message, result.errors);
       }
       continue;
     }
@@ -99,6 +119,7 @@ export function parsePiJsonl(stdout: string): ParsedPiOutput {
           result.finalMessage = text;
           result.messages.push(text);
         }
+        collectAssistantError(message, result.errors);
         
         // Extract usage and cost from assistant message
         const usage = asRecord(message.usage);
